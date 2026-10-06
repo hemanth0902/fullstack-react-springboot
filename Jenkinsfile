@@ -21,13 +21,15 @@ pipeline {
 
     stages {
 
-        // ============================================================
+        // =========================================================
         // 1. CHECKOUT
-        // ============================================================
+        // =========================================================
 
-        stage('Checkout') {
+        stage('1. Checkout') {
             steps {
-                echo 'Checking out source code from GitHub...'
+                echo '========================================'
+                echo 'Checking out source code from GitHub'
+                echo '========================================'
 
                 git branch: 'main',
                     url: 'https://github.com/hemanth0902/fullstack-react-springboot.git'
@@ -35,13 +37,15 @@ pipeline {
         }
 
 
-        // ============================================================
+        // =========================================================
         // 2. GITLEAKS
-        // ============================================================
+        // =========================================================
 
-        stage('GitLeaks - Secret Scan') {
+        stage('2. GitLeaks - Secret Scan') {
             steps {
-                echo 'Scanning source code for leaked secrets...'
+                echo '========================================'
+                echo 'Scanning source code for leaked secrets'
+                echo '========================================'
 
                 bat '''
                     gitleaks detect --source . --no-banner
@@ -50,13 +54,15 @@ pipeline {
         }
 
 
-        // ============================================================
+        // =========================================================
         // 3. BUILD
-        // ============================================================
+        // =========================================================
 
-        stage('Backend Build') {
+        stage('3. Backend Build') {
             steps {
-                echo 'Building Spring Boot backend...'
+                echo '========================================'
+                echo 'Building Spring Boot Backend'
+                echo '========================================'
 
                 dir('backend') {
                     bat '''
@@ -67,9 +73,11 @@ pipeline {
         }
 
 
-        stage('Frontend Build') {
+        stage('3. Frontend Build') {
             steps {
-                echo 'Building React frontend...'
+                echo '========================================'
+                echo 'Building React Frontend'
+                echo '========================================'
 
                 dir('frontend') {
                     bat '''
@@ -81,46 +89,52 @@ pipeline {
         }
 
 
-        // ============================================================
+        // =========================================================
         // 4. SONARQUBE
-        // ============================================================
+        // =========================================================
 
-        stage('SonarQube - SAST') {
+        stage('4. SonarQube - SAST') {
             steps {
-                echo 'Running SonarQube source-code analysis...'
+                echo '========================================'
+                echo 'Running SonarQube Static Analysis'
+                echo '========================================'
 
                 dir('backend') {
                     bat '''
                         mvn sonar:sonar ^
-                          -Dsonar.host.url=%SONAR_HOST_URL%
+                            -Dsonar.host.url=%SONAR_HOST_URL%
                     '''
                 }
             }
         }
 
 
-        // ============================================================
+        // =========================================================
         // 5. DEPENDENCY CHECK
-        // ============================================================
+        // =========================================================
 
-        stage('Dependency Check') {
+        stage('5. Dependency Check') {
             steps {
-                echo 'Scanning application dependencies...'
+                echo '========================================'
+                echo 'Scanning application dependencies'
+                echo '========================================'
 
-                dependency-check.bat ^
-                    --project "%APP_NAME%" ^
-                    --scan "." ^
-                    --format "HTML" ^
-                    --out "dependency-check-report"
+                bat '''
+                    dependency-check.bat ^
+                        --project "%APP_NAME%" ^
+                        --scan "." ^
+                        --format "HTML" ^
+                        --out "dependency-check-report"
+                '''
             }
         }
 
 
-        // ============================================================
+        // =========================================================
         // 6. TESTS
-        // ============================================================
+        // =========================================================
 
-        stage('Tests') {
+        stage('6. Tests') {
             parallel {
 
                 stage('Backend Tests') {
@@ -150,68 +164,78 @@ pipeline {
         }
 
 
-        // ============================================================
+        // =========================================================
         // 7. DOCKER BUILD
-        // ============================================================
+        // =========================================================
 
-        stage('Docker Build') {
+        stage('7. Docker Build') {
             steps {
 
-                echo 'Building backend Docker image...'
+                echo '========================================'
+                echo 'Building Backend Docker Image'
+                echo '========================================'
 
                 bat '''
                     docker build ^
-                      -t %BACKEND_IMAGE%:%IMAGE_TAG% ^
-                      ./backend
+                        -t %BACKEND_IMAGE%:%IMAGE_TAG% ^
+                        ./backend
                 '''
 
-                echo 'Building frontend Docker image...'
+                echo '========================================'
+                echo 'Building Frontend Docker Image'
+                echo '========================================'
 
                 bat '''
                     docker build ^
-                      -t %FRONTEND_IMAGE%:%IMAGE_TAG% ^
-                      ./frontend
+                        -t %FRONTEND_IMAGE%:%IMAGE_TAG% ^
+                        ./frontend
                 '''
             }
         }
 
 
-        // ============================================================
+        // =========================================================
         // 8. TRIVY
-        // ============================================================
+        // =========================================================
 
-        stage('Trivy - Container Scan') {
+        stage('8. Trivy - Container Security Scan') {
             steps {
 
-                echo 'Scanning backend Docker image...'
+                echo '========================================'
+                echo 'Scanning Backend Docker Image'
+                echo '========================================'
 
                 bat '''
                     trivy image ^
-                      --severity HIGH,CRITICAL ^
-                      --exit-code 1 ^
-                      %BACKEND_IMAGE%:%IMAGE_TAG%
+                        --severity HIGH,CRITICAL ^
+                        --exit-code 1 ^
+                        %BACKEND_IMAGE%:%IMAGE_TAG%
                 '''
 
-                echo 'Scanning frontend Docker image...'
+                echo '========================================'
+                echo 'Scanning Frontend Docker Image'
+                echo '========================================'
 
                 bat '''
                     trivy image ^
-                      --severity HIGH,CRITICAL ^
-                      --exit-code 1 ^
-                      %FRONTEND_IMAGE%:%IMAGE_TAG%
+                        --severity HIGH,CRITICAL ^
+                        --exit-code 1 ^
+                        %FRONTEND_IMAGE%:%IMAGE_TAG%
                 '''
             }
         }
 
 
-        // ============================================================
+        // =========================================================
         // 9. CHECKOV
-        // ============================================================
+        // =========================================================
 
-        stage('Checkov - IaC Scan') {
+        stage('9. Checkov - IaC Security Scan') {
             steps {
 
-                echo 'Scanning Infrastructure as Code...'
+                echo '========================================'
+                echo 'Scanning Infrastructure as Code'
+                echo '========================================'
 
                 bat '''
                     checkov -d .
@@ -220,37 +244,42 @@ pipeline {
         }
 
 
-        // ============================================================
+        // =========================================================
         // 10. SECURITY GATE
-        // ============================================================
+        // =========================================================
 
-        stage('Security Gate') {
+        stage('10. Security Gate') {
             steps {
 
-                echo '======================================'
-                echo '        SECURITY GATE'
-                echo '======================================'
+                echo '========================================'
+                echo '             SECURITY GATE'
+                echo '========================================'
 
                 echo 'GitLeaks       : PASSED'
                 echo 'SonarQube      : PASSED'
                 echo 'Dependency     : PASSED'
+                echo 'Tests          : PASSED'
                 echo 'Trivy          : PASSED'
                 echo 'Checkov        : PASSED'
 
-                echo 'All security checks passed.'
-                echo 'Deployment is allowed.'
+                echo '========================================'
+                echo 'ALL SECURITY CHECKS PASSED'
+                echo 'DEPLOYMENT IS ALLOWED'
+                echo '========================================'
             }
         }
 
 
-        // ============================================================
+        // =========================================================
         // 11. DOCKER REGISTRY
-        // ============================================================
+        // =========================================================
 
-        stage('Push Docker Images') {
+        stage('11. Push Docker Images') {
             steps {
 
-                echo 'Pushing Docker images to Docker Hub...'
+                echo '========================================'
+                echo 'Pushing Docker Images to Docker Hub'
+                echo '========================================'
 
                 withCredentials([
                     usernamePassword(
@@ -274,74 +303,115 @@ pipeline {
         }
 
 
-        // ============================================================
+        // =========================================================
         // 12. LOCAL KUBERNETES
-        // ============================================================
+        // =========================================================
 
-        stage('Deploy to Kubernetes') {
+        stage('12. Deploy to Local Kubernetes') {
             steps {
 
-                echo 'Deploying application to local Kubernetes...'
+                echo '========================================'
+                echo 'Deploying Application to Kubernetes'
+                echo '========================================'
 
                 bat '''
                     kubectl apply -f k8s/
                 '''
 
-                echo 'Checking Kubernetes deployment...'
+                echo '========================================'
+                echo 'Checking Kubernetes Pods'
+                echo '========================================'
 
                 bat '''
                     kubectl get pods
+                '''
+
+                echo '========================================'
+                echo 'Checking Kubernetes Services'
+                echo '========================================'
+
+                bat '''
                     kubectl get services
                 '''
             }
         }
 
 
-        // ============================================================
-        // 13. MONITORING
-        // ============================================================
+        // =========================================================
+        // 13. PROMETHEUS + GRAFANA
+        // =========================================================
 
-        stage('Monitoring') {
+        stage('13. Prometheus + Grafana Monitoring') {
             steps {
 
-                echo 'Checking Prometheus and Grafana...'
+                echo '========================================'
+                echo 'Checking Monitoring Stack'
+                echo '========================================'
 
                 bat '''
                     kubectl get pods -n monitoring
                 '''
 
-                echo 'Prometheus and Grafana monitoring stage completed.'
+                bat '''
+                    kubectl get services -n monitoring
+                '''
+
+                echo 'Prometheus and Grafana monitoring check completed.'
             }
         }
     }
 
 
-    // ================================================================
+    // =============================================================
     // POST ACTIONS
-    // ================================================================
+    // =============================================================
 
     post {
 
         success {
             echo '''
-            ==========================================
-            SECURE DEPLOY PIPELINE SUCCESSFUL
-            ==========================================
-            Application passed CI/CD and security
-            checks and was deployed successfully.
-            ==========================================
-            '''
+=============================================
+       SECURE DEPLOY PIPELINE SUCCESS
+=============================================
+
+Application:
+FullStack React + Spring Boot
+
+Pipeline:
+GitHub
+   -> Jenkins
+   -> GitLeaks
+   -> Build
+   -> SonarQube
+   -> Dependency Check
+   -> Tests
+   -> Docker
+   -> Trivy
+   -> Checkov
+   -> Security Gate
+   -> Docker Hub
+   -> Kubernetes
+   -> Prometheus
+   -> Grafana
+
+All stages completed successfully.
+=============================================
+'''
         }
 
         failure {
             echo '''
-            ==========================================
-            SECURE DEPLOY PIPELINE FAILED
-            ==========================================
-            Check the failed stage above.
-            Deployment was stopped.
-            ==========================================
-            '''
+=============================================
+       SECURE DEPLOY PIPELINE FAILED
+=============================================
+
+A pipeline stage failed.
+
+Deployment has been stopped.
+
+Check the failed stage and console output.
+=============================================
+'''
         }
 
         always {
