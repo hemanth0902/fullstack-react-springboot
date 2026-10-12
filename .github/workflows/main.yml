@@ -1,4 +1,4 @@
-
+```yaml
 name: Secure Deploy - DevSecOps CI
 
 on:
@@ -68,9 +68,27 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Verify NVD API key is configured
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          if [ -z "$NVD_API_KEY" ]; then
+            echo "ERROR: NVD_API_KEY is missing or empty."
+            exit 1
+          else
+            echo "NVD_API_KEY is configured."
+          fi
+
       - name: Scan Java dependencies
         working-directory: backend
-        run: mvn -B org.owasp:dependency-check-maven:check -DskipTests -DfailBuildOnCVSS=11 -Dformats=HTML
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          mvn -B org.owasp:dependency-check-maven:check \
+            -DskipTests \
+            -DfailBuildOnCVSS=11 \
+            -Dformats=HTML \
+            -DnvdApiKeyEnvironmentVariable=NVD_API_KEY
 
       - name: Upload Java dependency scan report
         if: always()
@@ -94,3 +112,4 @@ jobs:
       - name: Scan npm dependencies
         working-directory: frontend
         run: npm audit --audit-level=high
+```
