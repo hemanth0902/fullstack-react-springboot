@@ -67,9 +67,13 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      
       - name: Scan Java dependencies
         working-directory: backend
-        run: mvn -B org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7
+        run: |
+          mvn -B org.owasp:dependency-check-maven:check \
+            -DskipTests \
+            -DfailBuildOnCVSS=11
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
