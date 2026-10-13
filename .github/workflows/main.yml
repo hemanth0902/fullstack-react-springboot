@@ -72,7 +72,7 @@ jobs:
       - name: Cache OWASP vulnerability database
         uses: actions/cache@v4
         with:
-          path: ~/.cache/dependency-check
+          path: .dependency-check-data
           key: ${{ runner.os }}-owasp-data-v1
           restore-keys: |
             ${{ runner.os }}-owasp-data-
@@ -93,6 +93,7 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           mvn -B -ntp org.owasp:dependency-check-maven:check \
+            -DdataDirectory=${{ github.workspace }}/.dependency-check-data \
             -DskipTests \
             -DfailBuildOnCVSS=11 \
             -Dformats=HTML \
@@ -120,4 +121,3 @@ jobs:
       - name: Scan npm dependencies
         working-directory: frontend
         run: npm audit --audit-level=high
-
