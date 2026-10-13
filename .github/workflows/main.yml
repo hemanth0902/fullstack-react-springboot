@@ -1,4 +1,4 @@
-
+```yaml
 name: Secure Deploy - DevSecOps CI
 
 on:
@@ -56,6 +56,7 @@ jobs:
   dependency-scan:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout source code
@@ -68,6 +69,14 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Cache OWASP vulnerability database
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: ${{ runner.os }}-owasp-data-v1
+          restore-keys: |
+            ${{ runner.os }}-owasp-data-
+
       - name: Verify NVD API key is configured
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
@@ -75,16 +84,15 @@ jobs:
           if [ -z "$NVD_API_KEY" ]; then
             echo "ERROR: NVD_API_KEY is missing or empty."
             exit 1
-          else
-            echo "NVD_API_KEY is configured."
           fi
+          echo "NVD API key is configured."
 
       - name: Scan Java dependencies
         working-directory: backend
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          mvn -B org.owasp:dependency-check-maven:check \
+          mvn -B -ntp org.owasp:dependency-check-maven:check \
             -DskipTests \
             -DfailBuildOnCVSS=11 \
             -Dformats=HTML \
@@ -112,3 +120,4 @@ jobs:
       - name: Scan npm dependencies
         working-directory: frontend
         run: npm audit --audit-level=high
+```
