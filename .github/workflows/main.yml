@@ -56,7 +56,7 @@ jobs:
   dependency-scan:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout source code
@@ -73,7 +73,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .dependency-check-data
-          key: ${{ runner.os }}-owasp-data-v1
+          key: ${{ runner.os }}-owasp-data-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-owasp-data-
 
@@ -97,7 +97,7 @@ jobs:
             -DskipTests \
             -DfailBuildOnCVSS=11 \
             -Dformats=HTML \
-            -DnvdApiKeyEnvironmentVariable=NVD_API_KEY
+            -DnvdApiKey="$NVD_API_KEY"
 
       - name: Upload Java dependency scan report
         if: always()
