@@ -1,4 +1,4 @@
-```yaml
+
 name: Secure Deploy - DevSecOps CI
 
 on:
@@ -120,4 +120,4 @@ jobs:
       - name: Scan npm dependencies
         working-directory: frontend
         run: npm audit --audit-level=high
-```
+
