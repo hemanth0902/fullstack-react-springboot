@@ -38,7 +38,7 @@ export default function CreateProductPage() {
       },
       {
         onSuccess: () => {
-          navigate('/admin/products')
+          void navigate('/admin/products')
         },
       }
     )
@@ -55,13 +55,13 @@ export default function CreateProductPage() {
         className="bg-white shadow-md rounded-lg p-6 space-y-6"
       >
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="name" className="block text-sm font-medium mb-2">
             Product Name
           </label>
 
           <input
             type="text"
-            name="name"
+            id="name" name="name"
             value={form.name}
             onChange={handleChange}
             required
@@ -71,12 +71,12 @@ export default function CreateProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="description" className="block text-sm font-medium mb-2">
             Description
           </label>
 
           <textarea
-            name="description"
+            id="description" name="description"
             value={form.description}
             onChange={handleChange}
             required
@@ -88,13 +88,13 @@ export default function CreateProductPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Price
-            </label>
+            <label htmlFor="price" className="block text-sm font-medium mb-2">
+            Price
+          </label>
 
             <input
               type="number"
-              name="price"
+              id="price" name="price"
               value={form.price}
               onChange={handleChange}
               required
@@ -106,13 +106,13 @@ export default function CreateProductPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Stock
-            </label>
+            <label htmlFor="stock" className="block text-sm font-medium mb-2">
+            Stock
+          </label>
 
             <input
               type="number"
-              name="stock"
+              id="stock" name="stock"
               value={form.stock}
               onChange={handleChange}
               required
@@ -124,13 +124,13 @@ export default function CreateProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="category" className="block text-sm font-medium mb-2">
             Category
           </label>
 
           <input
             type="text"
-            name="category"
+            id="category" name="category"
             value={form.category}
             onChange={handleChange}
             required
@@ -140,13 +140,13 @@ export default function CreateProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="imageUrl" className="block text-sm font-medium mb-2">
             Image URL
           </label>
 
           <input
             type="url"
-            name="imageUrl"
+            id="imageUrl" name="imageUrl"
             value={form.imageUrl}
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-2"
@@ -165,7 +165,7 @@ export default function CreateProductPage() {
 
           <button
             type="button"
-            onClick={() => navigate('/admin/products')}
+            onClick={() => void navigate('/admin/products')}
             className="border px-6 py-2 rounded-lg"
           >
             Cancel

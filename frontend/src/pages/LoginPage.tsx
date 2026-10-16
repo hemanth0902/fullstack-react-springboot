@@ -16,7 +16,7 @@ export default function LoginPage() {
     onSuccess: (data) => {
       authLogin(data)
       toast.success(`Welcome back, ${data.firstName}!`)
-      navigate('/')
+      void navigate('/')
     },
     onError: () => toast.error('Invalid email or password'),
   })
@@ -29,9 +29,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
+              id="email"
               {...register('email', { required: 'Email is required' })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="you@example.com"
@@ -40,12 +41,13 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
               type="password"
+              id="password"
               {...register('password', { required: 'Password is required' })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="••••••••"
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
             />
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
