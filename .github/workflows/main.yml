@@ -12,6 +12,9 @@ permissions:
   contents: read
 
 jobs:
+  # --------------------------------------------------
+  # BUILD AND TEST
+  # --------------------------------------------------
   build:
     name: Build and Test
     runs-on: ubuntu-latest
@@ -34,7 +37,7 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Set up Node.js
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -54,10 +57,104 @@ jobs:
         run: npm run build
 
   # --------------------------------------------------
-  # TEMPORARILY DISABLED: Dependency Vulnerability Scan
-  # Uncomment this entire job for the final security run.
+  # SONARQUBE ANALYSIS - LOCAL WINDOWS RUNNER
   # --------------------------------------------------
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: [self-hosted, Windows, X64]
+    needs: [build]
 
+    # Do not run local self-hosted analysis on pull requests.
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Verify local SonarQube
+        shell: pwsh
+        run: |
+          $response = Invoke-WebRequest `
+            -Uri "http://localhost:9000/api/system/status" `
+            -UseBasicParsing
+
+          if ($response.StatusCode -ne 200) {
+            throw "SonarQube is not available."
+          }
+
+          $status = $response.Content | ConvertFrom-Json
+
+          if ($status.status -ne "UP") {
+            throw "SonarQube status is $($status.status)."
+          }
+
+          Write-Host "Local SonarQube is reachable and UP."
+
+      - name: Analyze Spring Boot backend
+        working-directory: backend
+        shell: pwsh
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
+            throw "SONAR_TOKEN is missing from GitHub Actions secrets."
+          }
+
+          mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar `
+            "-Dsonar.projectKey=Secure-Deploy-Backend" `
+            "-Dsonar.projectName=Secure Deploy Backend" `
+            "-Dsonar.host.url=http://localhost:9000" `
+            "-Dsonar.token=$env:SONAR_TOKEN" `
+            "-Dsonar.qualitygate.wait=true"
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Backend build or SonarQube analysis failed."
+          }
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Analyze React frontend
+        working-directory: frontend
+        shell: pwsh
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
+            throw "SONAR_TOKEN is missing from GitHub Actions secrets."
+          }
+
+          npx @sonar/scan `
+            "-Dsonar.host.url=http://localhost:9000" `
+            "-Dsonar.token=$env:SONAR_TOKEN" `
+            "-Dsonar.qualitygate.wait=true"
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Frontend SonarQube analysis failed."
+          }
+
+  # --------------------------------------------------
+  # DEPENDENCY SCAN - CURRENTLY DISABLED
+  # Enable this job later when you are ready to configure
+  # the NVD API key and dependency scanning.
+  # --------------------------------------------------
+  #
   # dependency-scan:
   #   name: Dependency Vulnerability Scan
   #   runs-on: ubuntu-latest
@@ -128,9 +225,8 @@ jobs:
   #       run: npm audit --audit-level=high
 
   # --------------------------------------------------
-  # CONTAINER SECURITY: Trivy
+  # CONTAINER SECURITY - TRIVY
   # --------------------------------------------------
-
   container-security:
     name: Build and Scan Docker Image
     runs-on: ubuntu-latest
