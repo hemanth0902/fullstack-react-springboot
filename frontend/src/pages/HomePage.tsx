@@ -18,7 +18,7 @@ export default function HomePage() {
 
         <div className="flex justify-center gap-4">
           <Link to="/products"
-            className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-medium transition-colors">
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
             Browse Products
           </Link>
           {!isAuthenticated ? (

@@ -2,13 +2,12 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: postgres
     environment:
       POSTGRES_DB: fullstackdb
       POSTGRES_USER: fsuser
       POSTGRES_PASSWORD: fspass
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
@@ -20,10 +19,10 @@ services:
       retries: 10
 
   backend:
+    image: hemanthpoojary/fullstack-react-springboot-backend:latest
     build: ./backend
-    container_name: backend
     ports:
-      - "8081:8080"
+      - "8082:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET:?Please set JWT_SECRET in PowerShell first}
@@ -35,11 +34,39 @@ services:
 
   frontend:
     build: ./frontend
-    container_name: frontend
     ports:
-      - "3000:80"
+      - "3001:80"
     depends_on:
       - backend
+    networks:
+      - app-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Please set GRAFANA_ADMIN_PASSWORD in PowerShell first}
+    depends_on:
+      - prometheus
     networks:
       - app-net
 
@@ -49,3 +76,5 @@ networks:
 
 volumes:
   postgres-data:
+  prometheus-data:
+  grafana-data:

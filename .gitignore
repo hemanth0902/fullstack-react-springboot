@@ -21,3 +21,6 @@ frontend/dist/
 
 # SonarQube scanner working files
 frontend/.scannerwork/
+
+# Local database backup
+fullstackdb-backup.dump

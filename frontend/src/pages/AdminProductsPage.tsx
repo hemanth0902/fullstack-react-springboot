@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProducts, useDeleteProduct } from '../hooks/useProducts'
@@ -17,34 +18,89 @@ export default function AdminProductsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      {/* Page heading and action buttons */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
-          <p className="text-gray-500 mt-1">{data?.totalElements ?? 0} total products</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Product Management
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {data?.totalElements ?? 0} total products
+          </p>
         </div>
-        <Link to="/admin/products/new"
-          className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-          + Add Product
-        </Link>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to="/products"
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Browse Products
+          </Link>
+
+          <Link
+            to="/admin/products/new"
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            + Add Product
+          </Link>
+        </div>
       </div>
 
-      {isLoading ? <LoadingSpinner /> : (
+      {/* Product list */}
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data?.content.map(product => (
-              <ProductCard key={product.id} product={product} isAdmin onDelete={handleDelete} />
-            ))}
-          </div>
+          {data?.content && data.content.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {data.content.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  isAdmin
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-gray-200 bg-white py-12 text-center shadow-sm">
+              <p className="text-lg font-medium text-gray-700">
+                No products found
+              </p>
+              <p className="mt-2 text-gray-500">
+                Add a product to get started.
+              </p>
+              <Link
+                to="/admin/products/new"
+                className="mt-5 inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                + Add Product
+              </Link>
+            </div>
+          )}
 
+          {/* Pagination */}
           {data && data.totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-8">
-              <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
-                className="px-4 py-2 border rounded-lg disabled:opacity-50 hover:bg-gray-50">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                disabled={page === 0}
+                onClick={() => setPage((current) => current - 1)}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 Previous
               </button>
-              <span className="px-4 py-2 text-gray-600">Page {page + 1} of {data.totalPages}</span>
-              <button disabled={data.last} onClick={() => setPage(p => p + 1)}
-                className="px-4 py-2 border rounded-lg disabled:opacity-50 hover:bg-gray-50">
+
+              <span className="px-2 py-2 text-gray-600">
+                Page {page + 1} of {data.totalPages}
+              </span>
+
+              <button
+                type="button"
+                disabled={data.last}
+                onClick={() => setPage((current) => current + 1)}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 Next
               </button>
             </div>

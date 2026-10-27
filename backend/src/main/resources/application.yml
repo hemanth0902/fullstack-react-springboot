@@ -1,3 +1,4 @@
+
 server:
   port: 8080
 
@@ -29,7 +30,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
 
 logging:
   level:

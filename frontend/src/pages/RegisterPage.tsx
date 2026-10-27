@@ -1,4 +1,4 @@
-﻿import { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { register as registerUser } from '../api/auth'
@@ -77,7 +77,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors"
+            className="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg cursor-pointer"
           >
             {mutation.isPending ? 'Creating account...' : 'Create account'}
           </button>

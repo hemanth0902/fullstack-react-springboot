@@ -1,9 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+@import "tailwindcss";
 
 @layer base {
   body {
     @apply text-gray-900 antialiased;
+  }
+}
+@layer components {
+  button,
+  a.btn,
+  a[role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    @apply bg-blue-600 text-white;
+  }
+
+  button:hover,
+  a.btn:hover,
+  a[role="button"]:hover,
+  input[type="submit"]:hover,
+  input[type="button"]:hover {
+    @apply bg-blue-700 text-white;
+  }
+
+  button:disabled,
+  input[type="submit"]:disabled {
+    @apply cursor-not-allowed opacity-50;
   }
 }
