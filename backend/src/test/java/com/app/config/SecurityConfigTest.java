@@ -36,7 +36,10 @@ class SecurityConfigTest {
                 "GET", "/api/products"));
 
         assertNotNull(cors);
-        assertEquals(List.of("http://localhost:3000"), cors.getAllowedOrigins());
+        assertEquals(
+    List.of("http://localhost:3000", "http://localhost:3001"),
+    cors.getAllowedOrigins()
+);
         assertEquals(
             List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"),
             cors.getAllowedMethods());
